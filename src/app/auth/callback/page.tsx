@@ -15,19 +15,47 @@ function AuthCallbackContent() {
 
   useEffect(() => {
     const handleCallback = async () => {
+      // Supabase implicit flow returns tokens in the URL hash
+      const hash = window.location.hash;
+      if (hash && hash.includes('access_token=')) {
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+
+        if (accessToken && refreshToken) {
+          try {
+            // Import apiClient to set tokens directly
+            const { apiClient } = await import('@/lib/api-client');
+            apiClient.setTokens(accessToken, refreshToken);
+            
+            // Get user profile with the new tokens
+            const user = await authService.getUserProfile();
+            setUser(user);
+            router.push('/dashboard');
+            return;
+          } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error obteniendo el perfil');
+            return;
+          }
+        }
+      }
+
+      // Fallback for code-based flow if ever used
       const code = searchParams.get('code');
 
-      if (!code) {
+      if (!code && !hash.includes('access_token=')) {
         setError('No se recibió código de autorización');
         return;
       }
 
-      try {
-        const user = await authService.handleOAuthCallback(code);
-        setUser(user);
-        router.push('/dashboard');
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error al procesar autenticación');
+      if (code) {
+        try {
+          const user = await authService.handleOAuthCallback(code);
+          setUser(user);
+          router.push('/dashboard');
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Error al procesar autenticación');
+        }
       }
     };
 
