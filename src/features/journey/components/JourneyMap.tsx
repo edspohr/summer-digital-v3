@@ -400,24 +400,37 @@ const getNodeIcon = (node: JourneyNode) => {
 function NodeButton({ node, onClick }: { node: JourneyNode; onClick: () => void }) {
   const statusColors = {
     completed: "bg-teal-500 text-white shadow-teal-200",
-    "in-progress": "bg-amber-400 text-amber-900 shadow-amber-200 animate-pulse-slow",
+    "in-progress": "bg-amber-400 text-amber-900 shadow-amber-200",
     available: "bg-white text-teal-600 border-2 border-teal-500",
     locked: "bg-slate-200 text-slate-400",
   };
 
-  const IconComponent = getNodeIcon(node);
+  const Icon = getNodeIcon(node);
 
   return (
     <motion.button
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.15, rotate: [0, -5, 5, 0] }}
+      whileTap={{ scale: 0.9 }}
+      animate={node.status === 'in-progress' ? {
+        scale: [1, 1.08, 1],
+        boxShadow: [
+          "0 0 0 0px rgba(251, 191, 36, 0.4)",
+          "0 0 0 10px rgba(251, 191, 36, 0)",
+          "0 0 0 0px rgba(251, 191, 36, 0)"
+        ]
+      } : {}}
+      transition={node.status === 'in-progress' ? {
+        duration: 2,
+        repeat: Infinity,
+        ease: "easeInOut"
+      } : {}}
       onClick={onClick}
       className={cn(
         "w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-colors z-20",
         statusColors[node.status] || statusColors.locked
       )}
     >
-      {React.createElement(IconComponent, {
+      {React.createElement(Icon, {
         size: 20,
         fill: node.status === 'completed' ? 'none' : 'currentColor',
         className: node.status === 'completed' ? '' : 'opacity-80'

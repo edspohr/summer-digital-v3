@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactConfetti from 'react-confetti';
 import { Journey, JourneyNode, NodeStatus } from '@/types';
@@ -383,12 +384,13 @@ export function JourneyPlayer({
               {/* Journey header */}
               <div className="mb-8 text-center space-y-2">
                 {journey.thumbnail_url ? (
-                  <div className="w-full h-32 rounded-2xl overflow-hidden mb-4">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                  <div className="w-full h-32 rounded-2xl overflow-hidden mb-4 relative">
+                    <Image
                       src={journey.thumbnail_url}
                       alt={journey.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 600px"
                     />
                   </div>
                 ) : (

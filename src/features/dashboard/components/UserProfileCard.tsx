@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { User } from '@/types';
 import { Sparkles, ChevronRight } from 'lucide-react';
 import { CompleteProfileModal } from './CompleteProfileModal';
@@ -39,11 +40,15 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
         <div className="relative z-10 flex flex-col items-center text-center gap-3">
           {/* Avatar */}
           {user.avatarUrl ? (
-            <img
-              src={user.avatarUrl}
-              alt={user.name}
-              className="h-20 w-20 rounded-full object-cover border-2 border-white/10 ring-2 ring-fuchsia-500/30 drop-shadow"
-            />
+            <div className="relative h-20 w-20 rounded-full overflow-hidden border-2 border-white/10 ring-2 ring-oasis-blue/30 drop-shadow">
+              <Image
+                src={user.avatarUrl}
+                alt={user.name}
+                fill
+                className="object-cover"
+                sizes="80px"
+              />
+            </div>
           ) : (
             <div className="h-20 w-20 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 border-2 border-white/10 ring-2 ring-fuchsia-500/30 flex items-center justify-center drop-shadow">
               <span className="text-2xl font-bold text-white drop-shadow">{initials}</span>

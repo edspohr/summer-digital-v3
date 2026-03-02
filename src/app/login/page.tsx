@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuthStore } from '@/store/useAuthStore';
 import { authService } from '@/services/auth.service';
 import { Button } from '@/components/ui/button';
@@ -102,25 +103,39 @@ export default function LoginPage() {
   // Mostrar loading mientras Zustand hidrata o si ya hay usuario (redirigiendo)
   if (!hydrated || user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-slate-900">Oasis Digital</h1>
-          <p className="text-slate-500">Cargando...</p>
+      <div className="min-h-screen oasis-gradient-135 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Image
+            src="/assets/logos/logo-icon.svg"
+            alt="Oasis Digital"
+            width={80}
+            height={80}
+            priority
+            className="mx-auto animate-pulse"
+          />
+          <p className="text-slate-600 font-secondary">Cargando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-white via-oasis-blue/5 to-oasis-teal/10 flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Blob decorativo */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-fuchsia-500/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-sky-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-oasis-pink/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-oasis-blue/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-slate-900">Oasis Digital</h1>
-          <p className="text-slate-500">Plataforma de bienestar y desarrollo</p>
+        <div className="text-center space-y-3">
+          <Image
+            src="/assets/logos/logo-horizontal.svg"
+            alt="Oasis Digital"
+            width={200}
+            height={52}
+            priority
+            className="mx-auto h-12 w-auto"
+          />
+          <p className="text-slate-500 font-secondary">Plataforma de bienestar y desarrollo</p>
         </div>
 
         <div className="bg-white/80 backdrop-blur-md border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-xl overflow-hidden">
@@ -172,7 +187,7 @@ export default function LoginPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-fuchsia-600 to-fuchsia-500 hover:from-fuchsia-500 hover:to-fuchsia-400 border-0 text-white shadow-md transition-transform hover:-translate-y-0.5"
+                  className="w-full bg-gradient-to-r from-oasis-blue to-oasis-teal hover:from-oasis-blue/90 hover:to-oasis-teal/90 border-0 text-white shadow-md transition-transform hover:-translate-y-0.5"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Ingresando...' : 'Iniciar Sesión'}
@@ -220,7 +235,7 @@ export default function LoginPage() {
                     <DialogTrigger asChild>
                       <button
                         type="button"
-                        className="text-sm text-slate-500 hover:text-fuchsia-600 underline transition-colors"
+                        className="text-sm text-slate-500 hover:text-oasis-blue underline transition-colors"
                       >
                         ¿Olvidaste tu contraseña?
                       </button>

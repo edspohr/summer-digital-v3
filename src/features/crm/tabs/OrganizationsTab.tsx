@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import Image from 'next/image';
 import { organizationService } from '@/services/organization.service';
 import {
   ApiOrganization,
@@ -277,11 +278,15 @@ export function OrganizationsTab() {
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       {org.logo_url ? (
-                        <img
-                          src={org.logo_url}
-                          alt={org.name}
-                          className="h-6 w-6 rounded object-cover shrink-0"
-                        />
+                        <div className="h-6 w-6 rounded overflow-hidden relative shrink-0">
+                          <Image
+                            src={org.logo_url}
+                            alt={org.name}
+                            fill
+                            className="object-cover"
+                            sizes="24px"
+                          />
+                        </div>
                       ) : (
                         <div className="h-6 w-6 rounded bg-teal-100 flex items-center justify-center shrink-0">
                           <Building2 className="h-3.5 w-3.5 text-teal-600" />

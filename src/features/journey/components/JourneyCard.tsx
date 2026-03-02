@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Journey } from '@/types';
@@ -66,9 +67,14 @@ export function JourneyCardCompact({
   const borderCls = CAT_BORDER_PARTICIPANT[key] ?? 'border-l-slate-200';
 
   return (
-    <div className={`bg-white border border-slate-100 border-l-4 ${borderCls}
+    <motion.div
+      whileHover={{ y: -2, boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)' }}
+      whileTap={{ scale: 0.98 }}
+      className={`bg-white border border-slate-100 border-l-4 ${borderCls}
                      rounded-2xl p-4 flex items-center gap-4
-                     hover:shadow-sm hover:border-slate-200 transition-all`}>
+                     cursor-pointer hover:border-slate-200 transition-all`}
+      onClick={onContinue}
+    >
       {/* Content */}
       <div className="flex-1 min-w-0 space-y-2">
         <div className="flex items-center gap-2">
@@ -93,31 +99,33 @@ export function JourneyCardCompact({
             <span className="font-medium tabular-nums">{progress}%</span>
           </div>
           <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-sky-400 to-teal-500 rounded-full transition-all duration-700"
-              style={{ width: `${progress}%` }}
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+              className="h-full bg-gradient-to-r from-sky-400 to-teal-500 rounded-full"
             />
           </div>
         </div>
       </div>
 
-      {/* CTA */}
-      {isDone ? (
-        <div className="shrink-0 text-xs font-semibold text-emerald-600
-                        bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl">
-          ✓ Listo
-        </div>
-      ) : (
-        <button
-          onClick={onContinue}
-          className="shrink-0 flex items-center gap-1 text-xs font-bold
-                     text-sky-600 bg-sky-50 border border-sky-100
-                     px-3 py-1.5 rounded-xl hover:bg-sky-100 transition-colors"
-        >
-          Continuar <ArrowRight size={12} />
-        </button>
-      )}
-    </div>
+      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+        {isDone ? (
+          <div className="shrink-0 text-xs font-semibold text-emerald-600
+                          bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl">
+            ✓ Listo
+          </div>
+        ) : (
+          <button
+            className="shrink-0 flex items-center gap-1 text-xs font-bold
+                       text-sky-600 bg-sky-50 border border-sky-100
+                       px-3 py-1.5 rounded-xl transition-colors"
+          >
+            Continuar <ArrowRight size={12} />
+          </button>
+        )}
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -146,11 +154,12 @@ export function JourneyCard({
       {/* Hero — image if available, gradient fallback */}
       {journey.thumbnail_url ? (
         <div className="h-28 relative overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={journey.thumbnail_url}
             alt={journey.title}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 400px"
           />
           {/* Overlay for readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />

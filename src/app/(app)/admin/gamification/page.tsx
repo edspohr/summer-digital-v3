@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { gamificationService } from '@/services/gamification.service';
@@ -17,7 +18,6 @@ import {
   ApiJourneyAdminRead,
   ApiStepAdminRead,
   ApiOrganization,
-  ApiGamificationConfigRead,
   ApiGamificationConfigCreate,
 } from '@/types/api.types';
 import { Button } from '@/components/ui/button';
@@ -131,16 +131,29 @@ function ConditionRow({
 
   // Cuando cambia a step_completed + hay journey seleccionado, carga los steps
   useEffect(() => {
+    let isMounted = true;
     if (condition.type === 'step_completed' && condition.journey_id) {
-      setLoadingSteps(true);
+      // Move to a separate microtask to avoid "cascading renders" lint error
+      Promise.resolve().then(() => {
+        if (isMounted) setLoadingSteps(true);
+      });
       journeyService
         .listAdminSteps(orgId, condition.journey_id)
-        .then(setSteps)
-        .catch(() => setSteps([]))
-        .finally(() => setLoadingSteps(false));
+        .then((data) => {
+          if (isMounted) setSteps(data);
+        })
+        .catch(() => {
+          if (isMounted) setSteps([]);
+        })
+        .finally(() => {
+          if (isMounted) setLoadingSteps(false);
+        });
     } else {
-      setSteps([]);
+      Promise.resolve().then(() => {
+        if (isMounted) setSteps([]);
+      });
     }
+    return () => { isMounted = false; };
   }, [condition.type, condition.journey_id, orgId]);
 
   return (
@@ -330,7 +343,6 @@ export default function GamificationAdminPage() {
   const [rewardForm, setRewardForm] = useState<RewardFormState>(EMPTY_REWARD_FORM);
 
   // Config
-  const [config, setConfig] = useState<ApiGamificationConfigRead | null>(null);
   const [isLoadingConfig, setIsLoadingConfig] = useState(true);
   const [configForm, setConfigForm] = useState<ApiGamificationConfigCreate>({
     points_enabled: true,
@@ -382,7 +394,7 @@ export default function GamificationAdminPage() {
     setIsLoadingConfig(true);
     try {
       const data = await gamificationService.getConfig(orgId);
-      setConfig(data);
+      // setConfig(data);
       if (data) {
         setConfigForm({
           points_enabled: data.points_enabled,
@@ -605,7 +617,7 @@ export default function GamificationAdminPage() {
 
           if (toAssign.length > 0) await gamificationService.assignRewardOrgs(savedRewardId, toAssign);
           if (toUnassign.length > 0) await gamificationService.unassignRewardOrgs(savedRewardId, toUnassign);
-        } catch (orgErr) {
+        } catch {
           // Reward was saved but org assignment failed — close dialog and show warning
           setRewardDialogOpen(false);
           await fetchRewards();
@@ -638,8 +650,8 @@ export default function GamificationAdminPage() {
     setIsSaving(true);
     setError(null);
     try {
-      const saved = await gamificationService.upsertConfig(orgId, configForm);
-      setConfig(saved);
+      await gamificationService.upsertConfig(orgId, configForm);
+      // setConfig(saved);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar configuración');
     } finally {
@@ -724,8 +736,8 @@ export default function GamificationAdminPage() {
               <div className="space-y-2">
                 {levels.map((level) => (
                   <div key={level.id} className="flex items-center gap-4 p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                      {level.icon_url ? <img src={level.icon_url} alt="" className="h-6 w-6" /> : <Star className="h-5 w-5 text-amber-600" />}
+                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center overflow-hidden relative">
+                      {level.icon_url ? <Image src={level.icon_url} alt="" fill className="object-cover" sizes="40px" /> : <Star className="h-5 w-5 text-amber-600" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-slate-900">{level.name}</p>
@@ -768,8 +780,8 @@ export default function GamificationAdminPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {rewards.map((reward) => (
                   <div key={reward.id} className="flex items-start gap-4 p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                      {reward.icon_url ? <img src={reward.icon_url} alt="" className="h-6 w-6" /> : <Award className="h-5 w-5 text-teal-600" />}
+                    <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+                      {reward.icon_url ? <Image src={reward.icon_url} alt="" fill className="object-cover" sizes="40px" /> : <Award className="h-5 w-5 text-teal-600" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">

@@ -17,6 +17,7 @@ interface AuthState {
   initializeSession: () => Promise<void>;
   addPoints: (points: number) => void;
   awardMedal: (medalId: string) => void;
+  updateProfile: (data: { name?: string; avatarUrl?: string }) => Promise<void>;
   setViewMode: (mode: 'admin' | 'participant') => void;
 }
 
@@ -133,7 +134,35 @@ export const useAuthStore = create<AuthState>()(
             }
           });
         }
-      }
+      },
+
+      updateProfile: async (data: { name?: string; avatarUrl?: string }) => {
+        const previousUser = get().user;
+        if (!previousUser) return;
+
+        // Optimistic update
+        const optimisticUser = {
+          ...previousUser,
+          ...(data.name ? { name: data.name } : {}),
+          ...(data.avatarUrl ? { avatarUrl: data.avatarUrl } : {}),
+        };
+
+        set({ user: optimisticUser });
+
+        try {
+          const updatedUser = await authService.updateMyProfile({
+            full_name: data.name,
+            avatar_url: data.avatarUrl,
+          });
+          set({ user: updatedUser });
+        } catch (error) {
+          // Rollback on error
+          set({ user: previousUser });
+          const message = error instanceof Error ? error.message : 'Error al actualizar perfil';
+          set({ error: message });
+          throw error;
+        }
+      },
     }),
     {
       name: 'auth-storage',

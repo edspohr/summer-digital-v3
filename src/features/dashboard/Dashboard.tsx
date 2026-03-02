@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuthStore } from '@/store/useAuthStore';
 import { gamificationService } from '@/services/gamification.service';
 import { ApiUserPointsSummary } from '@/types/api.types';
@@ -73,27 +75,38 @@ export function Dashboard() {
           PROFILE HERO CARD — full-width, prominent
       ══════════════════════════════════════════════════ */}
       <Link href="/profile">
-        <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden
-                        cursor-pointer hover:shadow-lg ${cardHoverBorder} transition-all group`}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+          className={`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden
+                        cursor-pointer hover:shadow-lg ${cardHoverBorder} transition-shadow group relative`}
+        >
           <div className="flex flex-col sm:flex-row">
 
             {/* Left gradient panel — avatar + score */}
             <div className={`bg-gradient-to-br ${heroGradient}
                             sm:w-52 p-6 flex flex-col items-center justify-center gap-4`}>
               {/* Avatar */}
-              <div className="w-20 h-20 rounded-2xl bg-white/20 border-2 border-white/30
-                              flex items-center justify-center text-white font-bold text-3xl
-                              overflow-hidden">
+              <motion.div
+                whileHover={{ rotate: 5, scale: 1.1 }}
+                className="relative w-20 h-20 rounded-2xl bg-white/20 border-2 border-white/30
+                               flex items-center justify-center text-white font-bold text-3xl
+                               overflow-hidden"
+              >
                 {user.avatarUrl
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                  ? <Image src={user.avatarUrl} alt={user.name} fill className="object-cover" sizes="80px" />
                   : initials}
-              </div>
+              </motion.div>
               {/* Score */}
               <div className="text-center">
-                <span className="text-4xl font-bold text-white tabular-nums block leading-none">
+                <motion.span
+                  initial={{ scale: 0.5 }}
+                  animate={{ scale: 1 }}
+                  className="text-4xl font-bold text-white tabular-nums block leading-none"
+                >
                   {displayPts}
-                </span>
+                </motion.span>
                 <span className="text-white/60 text-xs mt-1 block">Oasis Score</span>
               </div>
             </div>
@@ -108,10 +121,13 @@ export function Dashboard() {
                   </h2>
                   <p className="text-sm text-slate-400 mt-0.5">{ROLE_LABELS[user.role]}</p>
                 </div>
-                <span className={`px-3 py-1 ${levelBadge} text-xs font-semibold
-                                 rounded-full whitespace-nowrap shrink-0 border`}>
+                <motion.span
+                  whileHover={{ scale: 1.1 }}
+                  className={`px-3 py-1 ${levelBadge} text-xs font-semibold
+                                   rounded-full whitespace-nowrap shrink-0 border`}
+                >
                   {levelName}
-                </span>
+                </motion.span>
               </div>
 
               {/* Progress bar */}
@@ -123,10 +139,12 @@ export function Dashboard() {
                       <span className="font-medium tabular-nums">{levelProgress.pct}%</span>
                     </div>
                     <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${levelProgress.pct}%` }}
+                        transition={{ duration: 1, ease: 'easeOut', delay: 0.5 }}
                         className={`h-full bg-gradient-to-r ${progressBar}
-                                   rounded-full transition-all duration-700`}
-                        style={{ width: `${levelProgress.pct}%` }}
+                                   rounded-full`}
                       />
                     </div>
                     {levelProgress.next ? (
@@ -158,7 +176,7 @@ export function Dashboard() {
             </div>
 
           </div>
-        </div>
+        </motion.div>
       </Link>
 
       {/* ══════════════════════════════════════════════════
@@ -166,18 +184,32 @@ export function Dashboard() {
           (Participants see the banner inside ParticipantJourneysSection)
       ══════════════════════════════════════════════════ */}
       {isSubscriber && (
-        <div className="bg-gradient-to-r from-fuchsia-600 via-purple-500 to-fuchsia-400
-                        rounded-2xl p-6 text-white shadow-sm">
-          <h2 className="font-bold text-lg">Explora el contenido disponible</h2>
-          <p className="text-white/80 text-sm mt-1">Accede a recursos y actividades abiertas.</p>
-          <Link href="/resources">
-            <button className="mt-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.01 }}
+          className="bg-gradient-to-r from-fuchsia-600 via-purple-500 to-fuchsia-400
+                        rounded-2xl p-6 text-white shadow-sm overflow-hidden relative"
+        >
+          <div className="relative z-10">
+            <h2 className="font-bold text-lg">Explora el contenido disponible</h2>
+            <p className="text-white/80 text-sm mt-1">Accede a recursos y actividades abiertas.</p>
+            <Link href="/resources">
+              <motion.button
+                whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.3)' }}
+                whileTap={{ scale: 0.95 }}
+                className="mt-4 bg-white/20 backdrop-blur-sm text-white
                                text-sm font-semibold px-4 py-2 rounded-xl border border-white/30
-                               transition-colors">
-              Ver recursos
-            </button>
-          </Link>
-        </div>
+                               transition-colors"
+              >
+                Ver recursos
+              </motion.button>
+            </Link>
+          </div>
+          {/* Decorative circles */}
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-fuchsia-300/20 rounded-full blur-3xl" />
+        </motion.div>
       )}
 
       {/* ══════════════════════════════════════════════════

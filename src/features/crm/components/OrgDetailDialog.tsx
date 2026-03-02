@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useAuthStore } from '@/store/useAuthStore';
 import { organizationService } from '@/services/organization.service';
 import { crmService } from '@/services/crm.service';
@@ -19,7 +20,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -450,11 +450,15 @@ export function OrgDetailDialog({ org, onClose, onOrgUpdated }: Props) {
             <div className="flex items-center gap-4 px-6 pt-5 pb-4">
               {/* Logo / Avatar */}
               {org.logo_url ? (
-                <img
-                  src={org.logo_url}
-                  alt={org.name}
-                  className="h-14 w-14 shrink-0 rounded-xl object-cover ring-2 ring-white shadow-sm"
-                />
+                <div className="h-14 w-14 shrink-0 rounded-xl overflow-hidden relative ring-2 ring-white shadow-sm">
+                  <Image
+                    src={org.logo_url}
+                    alt={org.name}
+                    fill
+                    className="object-cover"
+                    sizes="56px"
+                  />
+                </div>
               ) : (
                 <div className="h-14 w-14 shrink-0 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center ring-2 ring-white shadow-sm">
                   <Building2 className="h-7 w-7 text-white" />

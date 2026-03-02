@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { User } from '@/types';
 
 interface HeroBannerProps {
@@ -44,10 +45,9 @@ export function HeroBanner({ user }: HeroBannerProps) {
       {/* Content */}
       <div className="relative z-10 flex items-center gap-5">
         {/* Avatar */}
-        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/40 flex items-center justify-center font-bold text-xl shrink-0 overflow-hidden">
+        <div className="relative w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/40 flex items-center justify-center font-bold text-xl shrink-0 overflow-hidden">
           {user.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+            <Image src={user.avatarUrl} alt={user.name} fill className="object-cover" sizes="64px" />
           ) : (
             <span>{initials}</span>
           )}

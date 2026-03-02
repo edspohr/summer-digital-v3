@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -247,14 +248,13 @@ export default function ProfilePage() {
                 className="hidden"
                 onChange={handleAvatarFileChange}
               />
-              <div className="w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30
+              <div className="relative w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm border-2 border-white/30
                               overflow-hidden flex items-center justify-center
                               text-white font-bold text-3xl">
                 {uploadingAvatar ? (
                   <Loader2 className="h-8 w-8 text-white animate-spin" />
                 ) : user.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                  <Image src={user.avatarUrl} alt={user.name} fill className="object-cover" sizes="96px" />
                 ) : (
                   initials
                 )}
@@ -612,8 +612,7 @@ export default function ProfilePage() {
                         title={userReward.reward?.description ?? ''}
                       >
                         {userReward.reward?.icon_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={userReward.reward.icon_url} alt="" className="h-4 w-4" />
+                          <Image src={userReward.reward.icon_url} alt="" width={16} height={16} className="h-4 w-4" />
                         ) : (
                           <Award className="h-4 w-4 text-amber-500" />
                         )}

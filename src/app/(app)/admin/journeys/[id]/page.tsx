@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { adminService } from '@/services/admin.service';
@@ -13,7 +14,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -54,7 +54,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MultiSelect } from '@/components/ui/multi-select';
-import { detectAndResolveUrl, getResourceLabel, type DetectedResource } from '@/lib/url-detection';
+import { detectAndResolveUrl, type DetectedResource } from '@/lib/url-detection';
 import {
   DndContext,
   closestCenter,
@@ -129,7 +129,12 @@ function getStepTypeLabel(type: ApiStepType) {
   return option?.label || type;
 }
 
-function SortableStepItem({
+function StepIcon({ type, config, className }: { type: ApiStepType; config?: Record<string, unknown>; className?: string }) {
+  const Icon = useMemo(() => getStepIcon(type, config), [type, config]);
+  return React.createElement(Icon, { className });
+}
+
+function SortableStep({
   step,
   onEdit,
   onDelete,
@@ -154,8 +159,6 @@ function SortableStepItem({
     transition,
   };
 
-  const Icon = getStepIcon(step.type, step.config);
-
   return (
     <div
       ref={setNodeRef}
@@ -177,7 +180,7 @@ function SortableStepItem({
       )}
 
       <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
-        <Icon className="h-4 w-4" />
+        <StepIcon type={step.type} config={step.config} className="h-4 w-4" />
       </div>
 
       <div className="flex-1 min-w-0">
@@ -802,8 +805,13 @@ export default function JourneyEditorPage() {
                                hover:border-fuchsia-300 transition-colors relative block"
                   >
                     {journey?.thumbnail_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={journey.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                      <Image
+                        src={journey.thumbnail_url}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="96px"
+                      />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-fuchsia-500 to-purple-600
                                       flex items-center justify-center">
@@ -1344,7 +1352,7 @@ export default function JourneyEditorPage() {
                     strategy={verticalListSortingStrategy}
                   >
                     {steps.map((step) => (
-                      <SortableStepItem
+                      <SortableStep
                         key={step.id}
                         step={step}
                         onEdit={openEditDialog}

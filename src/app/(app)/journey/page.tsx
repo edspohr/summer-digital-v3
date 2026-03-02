@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useJourneyStore } from '@/store/useJourneyStore';
@@ -557,9 +558,13 @@ export default function JourneyPage() {
                   >
                     {journey.thumbnail_url ? (
                       <div className="h-24 relative overflow-hidden">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={journey.thumbnail_url} alt={journey.title}
-                          className="w-full h-full object-cover" />
+                        <Image
+                          src={journey.thumbnail_url}
+                          alt={journey.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 300px"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                         <div className="absolute bottom-2 right-2">
                           <CheckCircle size={16} className="text-white drop-shadow" />

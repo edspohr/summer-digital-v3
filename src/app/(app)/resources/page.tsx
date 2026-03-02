@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { resourceService } from '@/services/resource.service';
 import { organizationService } from '@/services/organization.service';
@@ -300,11 +301,12 @@ export default function ResourcesPage() {
                   isLocked ? 'bg-slate-100' : 'bg-slate-50'
                 )}>
                   {resource.thumbnail_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={resource.thumbnail_url}
                       alt={resource.title}
-                      className={cn('w-full h-full object-cover', isLocked && 'grayscale')}
+                      fill
+                      className={cn('object-cover', isLocked && 'grayscale')}
+                      sizes="(max-width: 768px) 100vw, 400px"
                     />
                   ) : (
                     <TypeIcon className="w-12 h-12 text-slate-200" />

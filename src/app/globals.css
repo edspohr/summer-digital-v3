@@ -1,11 +1,33 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* ── Oasis Digital Brand Fonts ───────────────────────────── */
+@font-face {
+  font-family: "Horizon";
+  src:
+    url("/fonts/Horizon.woff2") format("woff2"),
+    url("/fonts/Horizon.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-primary);
   --font-mono: var(--font-geist-mono);
+
+  /* ── Brand Pastel Colors ── */
+  --color-oasis-blue: #92adef;
+  --color-oasis-teal: #8dd4da;
+  --color-oasis-pink: #f4c4dc;
+  --color-oasis-yellow: #fde49c;
+  --color-oasis-orange: #ecc389;
+  --color-oasis-black: #000000;
+  --color-oasis-white: #ffffff;
+
+  /* ── Shadcn semantic aliases mapped to brand ── */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -52,31 +74,37 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0); /* Slate 900 */
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: #92adef;
+  --primary-foreground: #000000;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: #8dd4da;
+  --accent-foreground: #000000;
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.205 0 0); /* Match Primary */
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --ring: #92adef;
+  --chart-1: #92adef;
+  --chart-2: #8dd4da;
+  --chart-3: #f4c4dc;
+  --chart-4: #fde49c;
+  --chart-5: #ecc389;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #92adef;
+  --sidebar-primary-foreground: #000000;
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.205 0 0);
+  --sidebar-ring: #92adef;
+
+  /* ── Brand Font Variables ── */
+  --font-primary: "Montserrat", sans-serif;
+  --font-secondary: "Be Vietnam Pro", sans-serif;
+  --font-titles: "Horizon", "Anton", sans-serif;
+  --font-subtitles: "Anton", sans-serif;
 }
 
 @layer base {
@@ -85,5 +113,111 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-primary);
   }
+}
+
+/* ══════════════════════════════════════════════════════════
+   Oasis Digital — Brand Gradient Utilities
+   ══════════════════════════════════════════════════════════ */
+
+/* Linear 135° — diagonal pastel sweep */
+.oasis-gradient-135 {
+  background: linear-gradient(
+    135deg,
+    #92adef 0%,
+    #8dd4da 25%,
+    #f4c4dc 50%,
+    #fde49c 75%,
+    #ecc389 100%
+  );
+}
+
+/* Linear 180° — vertical pastel flow */
+.oasis-gradient-180 {
+  background: linear-gradient(
+    180deg,
+    #92adef 0%,
+    #8dd4da 25%,
+    #f4c4dc 50%,
+    #fde49c 75%,
+    #ecc389 100%
+  );
+}
+
+/* Linear 90° — horizontal pastel band */
+.oasis-gradient-90 {
+  background: linear-gradient(
+    90deg,
+    #92adef 0%,
+    #8dd4da 25%,
+    #f4c4dc 50%,
+    #fde49c 75%,
+    #ecc389 100%
+  );
+}
+
+/* Circular radial 50/50 — centered bloom */
+.oasis-gradient-radial {
+  background: radial-gradient(
+    circle at 50% 50%,
+    #92adef 0%,
+    #8dd4da 20%,
+    #f4c4dc 40%,
+    #fde49c 70%,
+    #ecc389 100%
+  );
+}
+
+/* ── Subtle gradient for skeletons ── */
+@keyframes oasis-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.oasis-skeleton {
+  background: linear-gradient(
+    90deg,
+    #8dd4da20 25%,
+    #f4c4dc30 50%,
+    #8dd4da20 75%
+  );
+  background-size: 200% 100%;
+  animation: oasis-shimmer 2s ease-in-out infinite;
+}
+
+/* ── Brand gradient text utility ── */
+.oasis-gradient-text {
+  background: linear-gradient(135deg, #92adef, #8dd4da, #f4c4dc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glow effect for interactive elements ── */
+.oasis-glow {
+  box-shadow:
+    0 0 20px rgba(146, 173, 239, 0.3),
+    0 0 40px rgba(141, 212, 218, 0.15);
+}
+
+.oasis-glow-pink {
+  box-shadow:
+    0 0 20px rgba(244, 196, 220, 0.35),
+    0 0 40px rgba(146, 173, 239, 0.15);
+}
+
+/* ── Font utility classes ── */
+.font-titles {
+  font-family: var(--font-titles);
+}
+.font-subtitles {
+  font-family: var(--font-subtitles);
+}
+.font-secondary {
+  font-family: var(--font-secondary);
 }

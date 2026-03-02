@@ -78,11 +78,10 @@ export const useJourneyStore = create<JourneyState>((set, get) => ({
     const enrollmentId = enrollmentMap.get(selectedJourneyId);
     if (!enrollmentId) return;
 
-    await journeyService.completeNode(enrollmentId, nodeId, externalReference);
+    // Save previous state for rollback
+    const previousJourneys = journeys;
 
-    // Points are now handled by the backend trigger (handle_step_completion)
-    // No need to manually add points in frontend
-
+    // Calculate optimistic update
     const updatedJourneys = journeys.map(journey => {
       if (journey.id !== selectedJourneyId) return journey;
 
@@ -101,7 +100,7 @@ export const useJourneyStore = create<JourneyState>((set, get) => ({
 
       const finalNodes = updatedNodes.map(node => {
         if (node.status === 'completed') completedNodesCount++;
-        if (nextNodeId && node.id === nextNodeId && node.status === 'locked') {
+        if (nextNodeId && node.id === nextNodeId && (node.status === 'locked' || node.status === 'available')) {
           return { ...node, status: 'available' as const };
         }
         return node;
@@ -117,6 +116,17 @@ export const useJourneyStore = create<JourneyState>((set, get) => ({
       return { ...journey, nodes: finalNodes, progress, status };
     });
 
+    // Apply optimistic update
     set({ journeys: updatedJourneys });
+
+    try {
+      await journeyService.completeNode(enrollmentId, nodeId, externalReference);
+      // Success: state is already updated
+    } catch (error) {
+      console.error('Error completing activity optimistically:', error);
+      // Rollback on failure
+      set({ journeys: previousJourneys });
+      throw error; // Let the caller handle toast notifications if any
+    }
   },
 }));

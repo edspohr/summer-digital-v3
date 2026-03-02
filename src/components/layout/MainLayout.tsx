@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -37,13 +38,7 @@ import { UserRole } from '@/types';
 import { Toaster } from 'sonner';
 import { journeyService } from '@/services/journey.service';
 import { OnboardingGate } from './OnboardingGate';
-
-const ROLE_LABELS: Record<string, string> = {
-  SuperAdmin: 'Super Administrador',
-  Admin: 'Administrador',
-  Participant: 'Participante',
-  Subscriber: 'Suscriptor',
-};
+import PageTransition from '@/components/animations/PageTransition';
 
 interface NavItem {
   label: string;
@@ -118,7 +113,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       if (res.should_show && res.journey_id) {
         setOnboardingJourneyId(res.journey_id);
       }
-      // else: should_show=false → no hacer nada, re-check en el próximo fresh load
     }).catch(() => {
       sessionStorage.setItem('onboarding_checked', 'true');
     });
@@ -136,17 +130,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     router.push('/login');
   };
 
-  // Smart mode switch: navigates between participant/admin equivalent pages
   const handleModeSwitch = () => {
     const newMode = viewMode === 'admin' ? 'participant' : 'admin';
     setViewMode(newMode);
     if (newMode === 'admin') {
-      // Participant → Admin: redirect to admin equivalents
       if (pathname === '/resources') router.push('/admin/resources');
       else if (pathname === '/journey') router.push('/admin/journeys');
-      // else stay (dashboard, profile, etc. are accessible in both modes)
     } else {
-      // Admin → Participant: redirect to participant equivalents or dashboard
       if (pathname.startsWith('/admin/resources')) router.push('/resources');
       else if (pathname.startsWith('/admin/journeys')) router.push('/journey');
       else if (
@@ -154,11 +144,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         pathname.startsWith('/crm') ||
         pathname.startsWith('/analytics')
       ) router.push('/dashboard');
-      // else stay (dashboard, profile, etc. are accessible in both modes)
     }
   };
 
-  // Mostrar loading mientras Zustand hidrata
   if (!hydrated || !user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center">
@@ -170,7 +158,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
-  // Onboarding gate: full-screen immersive experience for Participants on first login
   if (onboardingJourneyId) {
     return (
       <OnboardingGate
@@ -183,7 +170,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
-  // Effective role for nav filtering: admins in participant mode see participant nav
   const effectiveRole: UserRole = isAdminUser && viewMode === 'participant'
     ? 'Participant'
     : (user?.role ?? 'Subscriber');
@@ -198,7 +184,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   const filteredNavItems = filterItems(NAV_ITEMS);
 
-  // ── Theme tokens (light participant vs dark admin) ───────────────────────
   const navInactive = isParticipantTheme
     ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
     : 'text-neutral-400 hover:text-neutral-200 hover:bg-white/5';
@@ -215,7 +200,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     ? 'text-slate-600 hover:text-slate-900'
     : 'text-neutral-400 hover:text-neutral-200';
 
-  // ── Desktop topbar nav item renderer ────────────────────────────────────
   const renderTopbarItem = (item: NavItem) => {
     const isActive =
       pathname === item.href ||
@@ -236,7 +220,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       return (
         <DropdownMenu key={item.label}>
           <DropdownMenuTrigger asChild>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className={cn(
                 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors focus:outline-none',
                 isActive ? activeGradient : navInactive
@@ -245,7 +231,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <item.icon size={16} />
               {item.label}
               <ChevronDown size={14} className="transition-transform duration-200" />
-            </button>
+            </motion.button>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="bottom" align="start" className={dropdownContent}>
             {filteredChildren.map((child) => {
@@ -271,7 +257,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
     return (
       <Link key={item.href} href={item.href}>
-        <span
+        <motion.span
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           className={cn(
             'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
             isActive ? activeGradient : navInactive
@@ -279,12 +267,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         >
           <item.icon size={16} />
           {item.label}
-        </span>
+        </motion.span>
       </Link>
     );
   };
 
-  // ── Mobile drawer nav item renderer ─────────────────────────────────────
   const renderNavItem = (item: NavItem, isMobile = false) => {
     const isActive =
       pathname === item.href ||
@@ -400,12 +387,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Toaster position="top-right" />
 
-      {/* Participant mode accent stripe — only for admin switching modes */}
       {isParticipantMode && (
         <div className="h-1 bg-gradient-to-r from-sky-500 via-teal-400 to-cyan-400 sticky top-0 z-[51]" />
       )}
 
-      {/* ── Unified Topbar ── */}
       <header className={cn(
         'sticky top-0 z-50 h-14 flex items-center gap-4 px-4 md:px-6 transition-all duration-300',
         isParticipantTheme
@@ -413,33 +398,32 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           : 'bg-neutral-950 border-b border-white/5'
       )}>
 
-        {/* Logo */}
         <Link
           href="/dashboard"
-          className={cn(
-            'font-bold text-lg tracking-tight shrink-0 mr-2 transition-colors duration-300',
-            isParticipantTheme ? 'text-sky-700' : 'text-white'
-          )}
+          className="shrink-0 mr-2 flex items-center"
         >
-          Oasis Digital
+          <Image
+            src={isParticipantTheme ? "/1.svg" : "/2.svg"}
+            alt="Oasis Digital"
+            width={160}
+            height={40}
+            priority
+            className="h-9 w-auto transition-all duration-300"
+          />
         </Link>
 
-        {/* Participant mode badge — only for admin switching modes */}
         {isParticipantMode && (
           <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-sky-100 text-sky-700 border border-sky-200">
             Participante
           </span>
         )}
 
-        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1 flex-1">
           {filteredNavItems.map((item) => renderTopbarItem(item))}
         </nav>
 
-        {/* Spacer on mobile */}
         <div className="flex-1 md:hidden" />
 
-        {/* Mode toggle (Admin + SuperAdmin only) */}
         {isAdminUser && (
           <div className="hidden md:flex items-center gap-2">
             <button
@@ -460,18 +444,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </div>
         )}
 
-        {/* Avatar dropdown (desktop) */}
         <div className="hidden md:block">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className={cn(
-                'h-9 w-9 rounded-full overflow-hidden border transition-colors focus:outline-none',
+                'relative h-9 w-9 rounded-full overflow-hidden border transition-colors focus:outline-none',
                 isParticipantTheme
                   ? 'border-sky-200 hover:border-sky-400'
                   : 'border-white/10 hover:border-white/30'
               )}>
                 {user.avatarUrl ? (
-                  <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover" />
+                  <Image src={user.avatarUrl} alt={user.name} fill className="object-cover" sizes="36px" />
                 ) : (
                   <div className="h-full w-full bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center">
                     <span className="text-xs font-semibold text-white">
@@ -506,7 +489,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </DropdownMenu>
         </div>
 
-        {/* Hamburger → Sheet (mobile) */}
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
@@ -531,7 +513,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                   : 'bg-neutral-950 border-r border-white/5'
               )}
             >
-              {/* Stripe at top of sheet — only for admin switching modes */}
               {isParticipantMode && (
                 <div className="h-1 bg-gradient-to-r from-sky-500 via-teal-400 to-cyan-400" />
               )}
@@ -543,7 +524,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <nav className="flex flex-col gap-1 p-4 mt-2 flex-1">
                 {filteredNavItems.map((item) => renderNavItem(item, true))}
               </nav>
-              {/* Mobile: mode toggle (admin only) */}
               {isAdminUser && (
                 <div className={cn('px-4 pb-2', isParticipantMode ? 'border-t border-sky-100 pt-3' : 'border-t border-white/5 pt-3')}>
                   <button
@@ -560,15 +540,18 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                   </button>
                 </div>
               )}
-              {/* Mobile: User profile + actions */}
               <div className={cn('p-4', isParticipantTheme ? 'border-t border-sky-100' : 'border-t border-white/5')}>
                 <div className="flex items-center gap-3 mb-3">
                   {user.avatarUrl ? (
-                    <img
-                      src={user.avatarUrl}
-                      alt={user.name}
-                      className={cn('h-10 w-10 rounded-full object-cover border', isParticipantTheme ? 'border-sky-200' : 'border-white/10')}
-                    />
+                    <div className={cn('relative h-10 w-10 rounded-full overflow-hidden border', isParticipantTheme ? 'border-sky-200' : 'border-white/10')}>
+                      <Image
+                        src={user.avatarUrl}
+                        alt={user.name}
+                        fill
+                        className="object-cover"
+                        sizes="40px"
+                      />
+                    </div>
                   ) : (
                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center border border-white/10">
                       <span className="text-sm font-semibold text-white">
@@ -620,9 +603,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
       </header>
 
-      {/* ── Main Content Area ── */}
-      <main className="flex-1 min-w-0 bg-slate-50">
-        {/* Participant mode banner — only for admin switching modes */}
+      <main className="flex-1 min-w-0 bg-slate-50 relative overflow-hidden">
         {isParticipantMode && (
           <div className="bg-sky-500 px-4 py-2.5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-white text-sm font-medium">
@@ -637,7 +618,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             </button>
           </div>
         )}
-        <div className="h-full overflow-auto p-4 md:p-8 max-w-7xl mx-auto">{children}</div>
+        <div className="h-full overflow-auto p-4 md:p-8 max-w-7xl mx-auto">
+          <AnimatePresence mode="wait" initial={false}>
+            <PageTransition key={pathname}>
+              {children}
+            </PageTransition>
+          </AnimatePresence>
+        </div>
       </main>
     </div>
   );
